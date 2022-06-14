@@ -1,0 +1,65 @@
+[{
+    "train": 1,
+    "test": 0,
+	"return_probabilities": false,
+	"threshold": 0.6,
+    "feature_extract": false,
+    "epochs": 50,
+    "network": "vgg16",
+    "tiles": 2000,
+    "val_tiles": 2000,
+    "even_classes": true,
+    "batch": 256,
+    "batch_val": 512,
+    "lr": 0.0003,
+    "magnification": "10x",
+    "classes": {
+        "lesion benign": 0,
+        "lesion malignant": 1
+    },
+    "patience": 5,
+    "report_batch": 24,
+    "train_path": "coordinates/train_03042022/",
+    "val_path": "coordinates/val_03042022/",
+    "test_path": "coordinates/test_03042022/",
+    "augmentations": null,
+    "transformation_type_train": "train",
+    "transformation_type_val": "val",
+    "only get dataset stats do not run": false,
+    "get_mean_std": false,
+    "weights_name": "weights.pt"
+},
+{
+    "train": 0,
+    "test": 0,
+	"return_probabilities": false,
+	"threshold": 0.6,
+    "feature_extract": false,
+    "epochs": 50,
+    "network": "vgg16",
+    "tiles": 2000,
+    "val_tiles": null,
+    "even_classes": true,
+    "batch": 256,
+    "batch_val": 512,
+    "lr": 0.0003,
+    "magnification": "10x",
+    "classes": {
+        "lesion benign": 0,
+        "lesion malignant": 1
+    },
+    "patience": 5,
+    "report_batch": 24,
+    "train_path": "coordinates/train_03042022/",
+    "val_path": "coordinates/val_03042022/",
+    "test_path": "coordinates/test_03042022/",
+    "augmentations": null,
+    "transformation_type_train": "train",
+    "transformation_type_val": "val",
+    "only get dataset stats do not run": false,
+    "get_mean_std": false,
+    "weights_name": "weights.pt"
+}
+
+]
+
