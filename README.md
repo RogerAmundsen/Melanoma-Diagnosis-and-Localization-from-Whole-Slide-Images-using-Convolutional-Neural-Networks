@@ -11,3 +11,4 @@ If running inference with a trained model, the user can download the weights of 
 https://www.dropbox.com/s/8tyxoybmd41mnf2/Model_17.pt?dl=0
 
 
+For inference, run inference.py
