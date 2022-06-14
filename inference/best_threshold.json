@@ -1,0 +1,26 @@
+{
+    "Model_10.pt": {
+        "best threshold": 0.9999997,
+        "f1": 0.6613075098141271
+    },
+    "Model_11.pt": {
+        "best threshold": 0.99999,
+        "f1": 0.7101987867197029
+    },
+    "Model_12.pt": {
+        "best threshold": 1,
+        "f1": 0.6270045502778726
+    },
+    "Model_14.pt": {
+        "best threshold": 0.99,
+        "f1": 0.5138668204245654
+    },
+    "Model_15.pt": {
+        "best threshold": 1,
+        "f1": 0.7069471555953967
+    },
+    "Model_17.pt": {
+        "best threshold": 0.999,
+        "f1": 0.753485747916003
+    }
+}

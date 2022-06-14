@@ -1,0 +1,44 @@
+[{
+	"model": "vgg16",
+	"weight_name": "Model_10.pt",
+	"class_dict": {"lesion benign": 0, "lesion malignant": 1},
+	"magnification": "10x",
+	"ImageNet_normalization": false
+},
+{
+	"model": "vgg16",
+	"weight_name": "Model_11.pt",
+	"class_dict": {"lesion benign": 0, "lesion malignant": 1},
+	"magnification": "10x",
+	"ImageNet_normalization": true
+},
+{
+	"model": "vgg16_bn",
+	"weight_name": "Model_12.pt",
+	"class_dict": {"lesion benign": 0, "lesion malignant": 1},
+	"magnification": "10x",
+	"ImageNet_normalization": false
+},
+{
+	"model": "vgg16_bn",
+	"weight_name": "Model_14.pt",
+	"class_dict": {"lesion benign": 0, "lesion malignant": 1},
+	"magnification": "40x",
+	"ImageNet_normalization": false
+},
+{
+	"model": "vgg16_bn",
+	"weight_name": "Model_15.pt",
+	"class_dict": {"lesion benign": 0, "lesion malignant": 1},
+	"magnification": "2.5x",
+	"ImageNet_normalization": false
+},
+{
+	"model": "vgg16",
+	"weight_name": "Model_17.pt",
+	"class_dict": {"lesion benign": 0, "lesion malignant": 1, "normal tissue": 2},
+	"magnification": "10x",
+	"ImageNet_normalization": false
+}
+]
+
