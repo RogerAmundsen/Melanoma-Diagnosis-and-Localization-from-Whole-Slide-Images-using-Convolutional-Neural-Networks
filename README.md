@@ -12,4 +12,4 @@ https://www.dropbox.com/s/8tyxoybmd41mnf2/Model_17.pt?dl=0
 
 The model weights must be placed in the folder Models/Weights/
 
-For inference, run inference.py
+For inference, run inference.py. inference.py takes a folder of WSIs as input and output predicted images and a slide based diagnosis. 1 = Melanoma. 0 = Benign nevus.
