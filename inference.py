@@ -91,18 +91,20 @@ class Inference:
     def __init__(self,
                  inference_metrics_path,
                  model_path,
-                 test_set_path,
+                 data_set_path,
                  probability_save_path,
                  batch_size,
                  wsi_mask_path,
-                 weights_name):
+                 weights_name,
+                 wsi_path):
         self.inference_metrics_path = inference_metrics_path
         self.model_path = model_path
-        self.test_set_path = test_set_path
+        self.data_set_path = data_set_path
         self.probability_save_path = probability_save_path
         self.batch_size = batch_size
         self.wsi_mask_path = wsi_mask_path
         self.weights_name = weights_name
+        self.wsi_path = wsi_path
         with open(self.inference_metrics_path+'best_weights.json', 'r') as file:
             self.weight_list = json.load(file)
             
@@ -121,20 +123,26 @@ class Inference:
                 print('weights_dict found')
 
     def store_probabilities_from_model(self):
-        '''Runs inference on and stores probabilities of a model'''
+        '''Runs inference on and stores probabilities of a model
+        This function will iterate through all WSIs in the WSI scan file folder and check if they have corresponding coordinates in the coordinates folder.
+        If cooresponding coordinates are found, inference will run.
+        The predicted probabilities are saved in a file that will be used further to create masks/overview images and slide-based predictions in other functions'''
             
         inference_dictionary = {}
         instance = Run_inference(self.weights, batch_size = self.batch_size)
         instance.create_model(self.model_path)
-        for wsi in os.listdir(self.test_set_path):
-            print(wsi)
-            instance.create_dataset(os.path.join(self.test_set_path,wsi), Inference_dataset)
-            pred_y = instance.inference()
-            inference_dictionary[wsi]=pred_y
-            
-            with open(self.probability_save_path+self.weights['weight_name'][:-3]+'.obj', 'wb') as handle:
-                pickle.dump(inference_dictionary, handle)
-                
+        
+        for wsi_scan_file_name in os.listdir(self.wsi_path):
+            for wsi_coordinates_name in os.listdir(self.data_set_path):
+                if wsi_coordinates_name[:-18] == wsi_scan_file_name[:-5]:
+                    
+                    instance.create_dataset(os.path.join(self.data_set_path,wsi_coordinates_name), Inference_dataset)
+                    pred_y = instance.inference()
+                    inference_dictionary[wsi_coordinates_name]=pred_y
+                    
+                    with open(self.probability_save_path+self.weights['weight_name'][:-3]+'.obj', 'wb') as handle:
+                        pickle.dump(inference_dictionary, handle)
+                    
     def store_prediction_images(self, path):
         '''Creates prediction_images and stores them in a given path'''
         
@@ -153,9 +161,10 @@ class Inference:
         
         
         for wsi, probabilities in prob_dict.items():
+            
             pred_y = classify(probabilities, self.threshold, 20)
             return_model_metrics = Return_model_metrics(self.wsi_mask_path, self.weights['class_dict'], True, self.weights_name, self.inference_metrics_path)
-            tp, tn, fp, fn, predicted_mask, annotation_metrics_dict = return_model_metrics.return_metrics_from_threshold(wsi, pred_y, self.test_set_path, ignore_regions=True)
+            tp, tn, fp, fn, predicted_mask, annotation_metrics_dict = return_model_metrics.return_metrics_from_threshold(wsi, pred_y, self.data_set_path, ignore_regions=False)
             #print(annotation_metrics_dict)
             path_wsi = path+self.weights['weight_name'][:-3]+'/'+wsi[:-4]+'/'
             os.makedirs(path_wsi, exist_ok=True)
@@ -171,15 +180,6 @@ class Inference:
             all_benign_pixels += annotation_metrics_dict['all benign pixels']
             all_malignant_pixels += annotation_metrics_dict['all malignant pixels']
             
-        print(all_benign_pixels)
-        print(tp_benign)
-        print(false_mal_in_ben_anno)
-        print(false_tissue_in_ben_anno)
-        print(all_malignant_pixels)
-        print(tp_malignant)
-        print(false_ben_in_mal_anno)
-        print(false_tissue_in_mal_anno)
-        
         
             
     def get_best_mel_ben_threshold(self):
@@ -198,10 +198,12 @@ class Inference:
             prediction_image = cv2.imread(path_wsi+image_name)
             prediction_image = cv2.cvtColor(prediction_image, cv2.COLOR_BGR2RGB)
             y = classify_wsi(prediction_image, self.threshold)
-            y_true = get_true_label(wsi)
+            #y_true = get_true_label(wsi)
             plt.figure(figsize=(10,10))
             plt.imshow(prediction_image)
-            plt.title('predicted: '+str(y)+'  true: '+str(y_true))
+            #plt.title('predicted: '+str(y)+'  true: '+str(y_true))
+            os.makedirs(self.inference_metrics_path+'test/classified/', exist_ok=True)
+            plt.title('predicted: '+str(y))
             plt.savefig(self.inference_metrics_path+'test/classified/'+wsi[:8]+'.png', bbox_inches='tight')
             plt.show()
             
@@ -212,7 +214,7 @@ class Inference:
         Green: Lesion Benign
         Yellow: Normal Tissue'''
         
-        for wsi in os.listdir(self.test_set_path):
+        for wsi in os.listdir(self.data_set_path):
             #load masks
             tissue_mask = cv2.imread(self.wsi_mask_path+'{}/tissue_mask.png'.format(wsi[:-18]),0)
             lesion_benign_mask = cv2.imread(self.wsi_mask_path+'{}/lesion benign.png'.format(wsi[:-18]),0)
@@ -242,22 +244,22 @@ def main(preprocess,
          wsi_path,
          wsi_mask_path,
          xml_path,
-         test_set_path,
+         data_set_path,
          model_path,
          inference_metrics_path,
          probability_save_path,
          weights_name,
          batch_size):
-    inference = Inference(inference_metrics_path, model_path, test_set_path, probability_save_path, batch_size, wsi_mask_path, weights_name)
+    inference = Inference(inference_metrics_path, model_path, data_set_path, probability_save_path, batch_size, wsi_mask_path, weights_name, wsi_path)
     if preprocess:
         preprocessing_main.main(background_segmentation=True,
-                                create_masks_from_annotations = True,
+                                create_masks_from_annotations = False, #If the WSI have noe xml-file of annotations, use False here.
                                 extract_patches = True,
                                 save_tiles_as_jpeg = False,
                                 xml_path = xml_path,
                                 wsi_path = wsi_path)
     inference.find_weights_dict()
-    #inference.store_probabilities_from_model()
+    inference.store_probabilities_from_model()
     inference.store_prediction_images(inference_metrics_path+'test/')
     inference.get_best_mel_ben_threshold()
     inference.classify_wsi_from_pred_images(inference_metrics_path+'test/')
@@ -269,13 +271,14 @@ def main(preprocess,
     
 if __name__ == '__main__':
     
-    main(preprocess = False,
+    main(preprocess = True,
          #wsi_path = 'WSI_all/',
-         wsi_path = '/home/prosjekt/Histology/Melanoma_SUS/MSc_Benign_Malign_HE/',
+         wsi_path = 'WSI_folder/',
+         #wsi_path = '/home/prosjekt/Histology/Melanoma_SUS/MSc_Benign_Malign_HE/',
          wsi_mask_path = 'WSIs/',
-         #xml_path = 'xml/',
-         xml_path = '/home/prosjekt/Histology/.xmlStorage/',
-         test_set_path = 'coordinates/inference_test/',
+         xml_path = 'xml/', #Path to xml-files of annotations
+         #xml_path = '/home/prosjekt/Histology/.xmlStorage/',
+         data_set_path = 'coordinates/',
          model_path = 'Models/',
          inference_metrics_path = 'inference/',
          probability_save_path = 'Models/inference/test_set/',

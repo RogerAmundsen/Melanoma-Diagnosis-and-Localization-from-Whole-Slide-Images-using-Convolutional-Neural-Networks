@@ -202,18 +202,26 @@ class Return_model_metrics:
             
             '''
         
-        #initiate dataset
+        #initiate dataset: a list of top left coordinates
         data_set_list = create_sets.unpack_single_wsi_inference(os.path.join(data_set_path,wsi))
         
         #load masks
         tissue_mask = cv2.imread(self.mask_path+'{}/tissue_mask.png'.format(wsi[:-18]),0)
-        lesion_benign_mask = cv2.imread(self.mask_path+'{}/lesion benign.png'.format(wsi[:-18]),0)
-        lesion_benign_mask[tissue_mask==0]=0
-        lesion_malignant_mask = cv2.imread(self.mask_path+'{}/lesion malignant.png'.format(wsi[:-18]),0)
-        lesion_malignant_mask[tissue_mask==0]=0
+        try:
+            lesion_benign_mask = cv2.imread(self.mask_path+'{}/lesion benign.png'.format(wsi[:-18]),0)
+            lesion_benign_mask[tissue_mask==0]=0
+            lesion_malignant_mask = cv2.imread(self.mask_path+'{}/lesion malignant.png'.format(wsi[:-18]),0)
+            lesion_malignant_mask[tissue_mask==0]=0
         
-        #create new masks
-        true_mask = lesion_benign_mask+lesion_malignant_mask
+            #create new masks
+            true_mask = lesion_benign_mask+lesion_malignant_mask
+            
+        except:
+            print('No masks from annotations found. No metrics will be returned. Only predicted image will be returned.')
+            true_mask = np.zeros((tissue_mask.shape), dtype='uint8')
+            lesion_benign_mask = np.zeros((tissue_mask.shape), dtype='uint8')
+            lesion_malignant_mask = np.zeros((tissue_mask.shape), dtype='uint8')
+            
         mask_to_overlook = np.zeros((tissue_mask.shape), dtype='uint8')
         
         if ignore_regions:
@@ -232,8 +240,8 @@ class Return_model_metrics:
         tissue_mask[true_mask!=0]=0
         tissue_mask = tissue_mask - mask_to_overlook
         tissue_mask[tissue_mask!=255]=0
-        if len(np.unique(true_mask))==1:
-            print('WARNING! NO MASK FOUND FOR '+wsi)
+        #if len(np.unique(true_mask))==1:
+        #    print('WARNING! NO MASK FOUND FOR '+wsi)
 
         #create empty prediction masks
         pred_mask_lesion_benign = np.zeros((tissue_mask.shape), dtype='uint8')
@@ -310,23 +318,6 @@ class Return_model_metrics:
                                    'false tissue in malignant': false_tissue_inside_malignant_anno,
                                    'all benign pixels': np.count_nonzero(lesion_benign_mask),
                                    'all malignant pixels': np.count_nonzero(lesion_malignant_mask)}
-        
-        
-        
-        # plt.imshow(union-intersection)
-        # plt.title('false positive: {}'.format(fp))
-        # plt.show()
-        # plt.imshow(pred_mask_tissue*tissue_mask)
-        # plt.title('true negative: {}'.format(tn))
-        # plt.show()
-        
-        # plt.imshow(intersection)
-        # plt.title('true positive: {}'.format(tp))
-        # plt.show()
-        
-        # plt.imshow(pred_mask_tissue*true_mask)
-        # plt.title('false negative: {}. recall: {}. p: {}, f1: {}'.format(fn, tp/(tp+fn), tp/(tp+fp), tp/(tp+0.5*(fp+fn))))
-        # plt.show()
         
         if not self.return_prediction_mask:
             pred_mask = None
