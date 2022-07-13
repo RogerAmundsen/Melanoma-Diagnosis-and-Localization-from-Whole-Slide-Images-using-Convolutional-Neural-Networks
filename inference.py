@@ -182,7 +182,7 @@ class Inference:
             
         
             
-    def get_best_mel_ben_threshold(self):
+    def get_best_mal_ben_threshold(self):
         with open(self.inference_metrics_path+'mal-ben_ratio_threshold.json', 'r') as file:
             mel_ben_threshold_dict = json.load(file)
         for threshold, values in mel_ben_threshold_dict.items():
@@ -261,7 +261,7 @@ def main(preprocess,
     inference.find_weights_dict()
     inference.store_probabilities_from_model()
     inference.store_prediction_images(inference_metrics_path+'test/')
-    inference.get_best_mel_ben_threshold()
+    inference.get_best_mal_ben_threshold()
     inference.classify_wsi_from_pred_images(inference_metrics_path+'test/')
     #inference.save_true_mask()
     
