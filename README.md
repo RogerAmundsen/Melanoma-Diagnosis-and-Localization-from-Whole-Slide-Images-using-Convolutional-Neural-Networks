@@ -23,3 +23,14 @@ When running inference.py, functions are called in the main-function:
 4) inference.get_best_mal_ben_threshold() collects the stored best ratio-threshold between malignant and benign pixels.
 5) inference.classify_wsi_from_pred_images() counts the number of malingnant and benign pixels and classify the WSI based on the ratio between them.
 6) inference.save_tru_mask() if annotations exist, this function will save a image with annotations that can be used as comparision with the predicted image.
+
+The following paths of inference.py:
+
+1) wsi_path: This is the folder where the whole slide image scan files are located
+2) wsi_mask_path: when running preprocessing, the masks created for each WSI for each class are stored here. Both as an object containing the top left coordinates of each patch and as image files.
+3) xml_path: If available, this is where the annotations from the pathologist are stored as xml files
+4) data_set_path: The folder where the top left coordinates of the extracted patches of each WSI are collected. During preprocessing, the the coordinates are stored by default in coordinates/
+5) model_path: The folder where the weights of the different models are stored
+6) probability_save_path: The folder where the output from the softmax-function is stored during inference. This is an object containing all WSIs used in inference and the probabilites of corresponing patches beloning to all possible classes.
+7) inference_metrics_path: the folder with textfiles that lists the best models, and the best thresholds. Also the folder where the resulting predictions and predicion images are stored
+
